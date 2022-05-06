@@ -155,6 +155,17 @@ const buttons = [
     },
     {
         en: {
+            low: "Del",
+            high: "Del"
+        },
+        ru: {
+            low: "Del",
+            high: "Del"
+        },  
+        id: "Del",
+    },
+    {
+        en: {
             low: "keyboard_tab",
             high: "keyboard_tab"
         },

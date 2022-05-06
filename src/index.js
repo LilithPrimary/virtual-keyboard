@@ -26,8 +26,7 @@ class KeyboardButton {
                 this.button.classList.add("key__wide");
                 break;
             case "backspace":
-                this.button.classList.add("key__wide", "material-symbols-outlined");
-                this.value = this.value.substring(0, this.value.length - 1);
+                this.button.classList.add("material-symbols-outlined");
                 break;
             case "keyboard_tab":
                 this.button.classList.add("key__wide", "material-symbols-outlined");
@@ -115,6 +114,7 @@ class KeyboardButton {
                     e.preventDefault();
                     this.button.classList.add("active");
                 }
+                if (e.code === "CapsLock") this._capsLock();
         })
         document.addEventListener("keyup", (e) => {
                 if (e.code === this.name.id) {
