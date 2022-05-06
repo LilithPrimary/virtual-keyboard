@@ -46,6 +46,7 @@ class KeyboardButton {
         this._setButtonSymbol(lang, registr);
         this.button.append(this.buttonValue);
         this._pressButton();
+        this._synchronizeWithKeyboard();
         document.body.append(this.button);
     }
 
@@ -98,6 +99,20 @@ class KeyboardButton {
             buttonsArray.forEach(el => el._setButtonSymbol(lang, registr));  
         }
     }
+
+    _synchronizeWithKeyboard() {
+        document.addEventListener("keydown", (e) => {
+                if (e.code === this.name.id) {
+                    e.preventDefault();
+                    this.button.classList.add("active");
+                }
+        })
+        document.addEventListener("keyup", (e) => {
+                if (e.code === this.name.id) {
+                    this.button.classList.remove("active");
+                }
+        })
+    }
 }
 
 const buttonsArray = buttons.map(el => {
@@ -110,19 +125,20 @@ const directions = document.createElement("button");
 directions.classList.add("key");
 directions.style.width = "19.2%"
 document.querySelector(".keyboard__wrapper").append(directions);
-document.addEventListener("keydown", (e) => {
-    console.log(e.key, e.code);
-    buttonsArray.forEach(el => {
-        if (e.code === el.name.id) {
-            e.preventDefault();
-            el.button.classList.add("active");
-        }
-    })
-})
-document.addEventListener("keyup", (e) => {
-    buttonsArray.forEach(el => {
-        if (e.code === el.name.id) {
-            el.button.classList.remove("active");
-        }
-    })
-})
+
+//synchronize with keyboard
+// document.addEventListener("keydown", (e) => {
+//     buttonsArray.forEach(el => {
+//         if (e.code === el.name.id) {
+//             e.preventDefault();
+//             el.button.classList.add("active");
+//         }
+//     })
+// })
+// document.addEventListener("keyup", (e) => {
+//     buttonsArray.forEach(el => {
+//         if (e.code === el.name.id) {
+//             el.button.classList.remove("active");
+//         }
+//     })
+// })
