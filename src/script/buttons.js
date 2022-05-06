@@ -390,8 +390,8 @@ const buttons = [
             high: "H"
         },
         ru: {
-            low: "Р",
-            high: "р"
+            low: "р",
+            high: "Р"
         },    
         id: "KeyH",      
     },

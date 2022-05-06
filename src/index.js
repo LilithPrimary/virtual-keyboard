@@ -5,14 +5,13 @@ import buttons from "./script/buttons.js"
 let lang = "en";
 let registr = "low";
 let multiPress = [];
+let isCaps = false;
+let isShift = false;
 
-class KeyboardButton {
-    
-    isUp = false;
+class KeyboardButton {    
     button = document.createElement("button");
     buttonValue = document.createElement("span");
     value = "";
-    isCaps = false;
 
     constructor(name) {
         this.name = name;
@@ -43,7 +42,7 @@ class KeyboardButton {
             case "space_bar": 
                 this.button.classList.add("key__space", "material-symbols-outlined");
         }
-        this._setButtonSymbol(lang, registr);
+        this._setButtonSymbol();
         this.button.append(this.buttonValue);
         this._pressButton();
         this._synchronizeWithKeyboard();
@@ -51,12 +50,51 @@ class KeyboardButton {
     }
 
     _pressButton() {
-        this.button.addEventListener("click", () => {
-            this._capsLock();
+        this.button.addEventListener("click", (e) => {
+            switch (this.name.id) {
+                case "CapsLock": this.value(); break;
+                case "ShiftLeft":
+                case "ShiftRight": this._shiftButton(); break;
+                case "ControlRight":
+                case "ControlLeft":
+                    if (isShift) {
+                        this._shiftButton();
+                        this._changeLanguage();
+                    }
+                    break;
+                default:
+                    if (isShift) {
+                        this._shiftButton();
+                    }
+            }    
         })    
     }
 
-    _setButtonSymbol(lang, registr) {
+    _shiftButton () {
+        if(isShift) {
+            buttonsArray.forEach(el => {
+                if (el.name.en.low === "Shift") {
+                    el.button.classList.remove("active");
+                    isShift = false;
+                    if (!isCaps) {
+                        registr = "low";
+                        this._changeButtonsValue();
+                    }
+                }
+            })
+        } else {
+            buttonsArray.forEach(el => {
+                if (el.name.en.low === "Shift") {
+                    el.button.classList.add("active");
+                    registr = "high";
+                    this._changeButtonsValue();
+                    isShift = true;
+                }
+            })
+        }
+    }
+
+    _setButtonSymbol() {
         this.buttonValue.textContent = this.name[lang][registr];
         switch (this.name.en.low) {
             case "Control":
@@ -87,25 +125,26 @@ class KeyboardButton {
     }
 
     _capsLock () {
-        if (this.isCaps) {
+        if (isCaps) {
             this.button.classList.remove("on");
             registr = "low";
-            this.isCaps = false;
-            this._changeButtonsValue(lang, registr);
+            isCaps = false;
+            this._changeButtonsValue();
         } else {
             this.button.classList.add("on");
             registr = "high";
-            this.isCaps = true;
-            this._changeButtonsValue(lang, registr); 
+            isCaps = true;
+            this._changeButtonsValue(); 
         }
     }
 
-    _changeLanguage (lang, registr) {
-        this._changeButtonsValue(lang, registr);
+    _changeLanguage () {
+        lang = lang === "en" ? "ru" : "en";
+        this._changeButtonsValue();
     }
 
-    _changeButtonsValue (lang, registr) {
-        buttonsArray.forEach(el => el._setButtonSymbol(lang, registr));
+    _changeButtonsValue () {
+        buttonsArray.forEach(el => el._setButtonSymbol());
     }
 
     _synchronizeWithKeyboard() {
@@ -128,14 +167,13 @@ document.addEventListener("keydown", (e) => {
     if (["Shift", "Control"].includes(e.key)) {
         multiPress.push(e.code);
     }
+    if (e.code === "ShiftLeft" || e.code === "ShiftRight") buttonsArray[0]._shiftButton();
 })
 document.addEventListener("keyup", (e) => {
 
-    if (multiPress.length === 2 && ([...new Set(["ShiftLeft", "ControlLeft"].concat(multiPress))].length === 2 || [...new Set(["ShiftRight", "ControlRight"].concat(multiPress))].length === 2)) {
+    if ([...new Set(multiPress)].length === 2 && ([...new Set(["ShiftLeft", "ControlLeft"].concat(multiPress))].length === 2 || [...new Set(["ShiftRight", "ControlRight"].concat(multiPress))].length === 2)) {
         multiPress.length = 0;
-        lang = lang === "en" ? "ru" : "en";
-        console.log("change");
-        buttonsArray[0]._changeLanguage(lang, registr);
+        buttonsArray[0]._changeLanguage();
     }
 })
 
