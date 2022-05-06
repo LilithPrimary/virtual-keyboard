@@ -4,6 +4,7 @@ import buttons from "./script/buttons.js"
 
 let lang = "en";
 let registr = "low";
+let multiPress = [];
 
 class KeyboardButton {
     
@@ -91,13 +92,21 @@ class KeyboardButton {
             this.button.classList.remove("on");
             registr = "low";
             this.isCaps = false;
-            buttonsArray.forEach(el => el._setButtonSymbol(lang, registr));
+            this._changeButtonsValue(lang, registr);
         } else {
             this.button.classList.add("on");
             registr = "high";
             this.isCaps = true;
-            buttonsArray.forEach(el => el._setButtonSymbol(lang, registr));  
+            this._changeButtonsValue(lang, registr); 
         }
+    }
+
+    _changeLanguage (lang, registr) {
+        this._changeButtonsValue(lang, registr);
+    }
+
+    _changeButtonsValue (lang, registr) {
+        buttonsArray.forEach(el => el._setButtonSymbol(lang, registr));
     }
 
     _synchronizeWithKeyboard() {
@@ -115,6 +124,21 @@ class KeyboardButton {
     }
 }
 
+document.addEventListener("keydown", (e) => {
+    if (["Shift", "Control"].includes(e.key)) {
+        multiPress.push(e.code);
+    }
+})
+document.addEventListener("keyup", (e) => {
+
+    if (multiPress.length === 2 && ([...new Set(["ShiftLeft", "ControlLeft"].concat(multiPress))].length === 2 || [...new Set(["ShiftRight", "ControlRight"].concat(multiPress))].length === 2)) {
+        multiPress.length = 0;
+        lang = lang === "en" ? "ru" : "en";
+        console.log("change");
+        buttonsArray[0]._changeLanguage(lang, registr);
+    }
+})
+
 const buttonsArray = buttons.map(el => {
     const button = new KeyboardButton (el);
     button.createButton();
@@ -125,20 +149,3 @@ const directions = document.createElement("button");
 directions.classList.add("key");
 directions.style.width = "19.2%"
 document.querySelector(".keyboard__wrapper").append(directions);
-
-//synchronize with keyboard
-// document.addEventListener("keydown", (e) => {
-//     buttonsArray.forEach(el => {
-//         if (e.code === el.name.id) {
-//             e.preventDefault();
-//             el.button.classList.add("active");
-//         }
-//     })
-// })
-// document.addEventListener("keyup", (e) => {
-//     buttonsArray.forEach(el => {
-//         if (e.code === el.name.id) {
-//             el.button.classList.remove("active");
-//         }
-//     })
-// })
