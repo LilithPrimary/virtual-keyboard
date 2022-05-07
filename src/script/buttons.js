@@ -162,7 +162,7 @@ const buttons = [
             low: "Del",
             high: "Del"
         },  
-        id: "Del",
+        id: "Delete",
     },
     {
         en: {
