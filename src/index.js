@@ -107,7 +107,7 @@ class KeyboardButton {
                 this.value = this.value.substring(0, this.value.length - 1);
                 break;
             case "keyboard_tab":
-                this.value = "  ";
+                this.value = "    ";
                 break;
             case "capslock":
                 this.value = this._capsLock;
@@ -156,18 +156,52 @@ class KeyboardButton {
                     e.preventDefault();
                     this.button.classList.add("active");
                 }
+                if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)) {
+                    e.target.classList.add("active");
+                }
+                switch(e.code) {
+                    case "ArrowUp": btnUp.classList.add("active"); break;
+                    case "ArrowDown": btnDown.classList.add("active"); break;
+                    case "ArrowLeft": btnLeft.classList.add("active"); break;
+                    case "ArrowRight": btnRight.classList.add("active");
+                }
         })
         document.addEventListener("keyup", (e) => {
                 if (e.code === this.name.id) {
                     this.button.classList.remove("active");
+                }
+                if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)) {
+                    e.target.classList.remove("active");
+                }
+                switch(e.code) {
+                    case "ArrowUp": btnUp.classList.remove("active"); break;
+                    case "ArrowDown": btnDown.classList.remove("active"); break;
+                    case "ArrowLeft": btnLeft.classList.remove("active"); break;
+                    case "ArrowRight": btnRight.classList.remove("active");
                 }
         })
     }
 }
 
 function workWithTextarea (inst) {
+    let buttonCode;
+    let symbol;
+    if (inst instanceof KeyboardButton) {
+        buttonCode = inst.name.id;
+        symbol = inst.buttonValue.textContent;
+    } else {
+        if (inst.key === "Control") return;
+        buttonCode = inst.code;
+        buttonsArray.forEach(el => {
+            if (el.name.id === buttonCode) {
+                symbol = el.buttonValue.textContent;
+            }
+        })
+    }
+    if (!buttonsArray.some(el => el.name.id === buttonCode)) return; 
+    let keyCode = inst instanceof KeyboardButton ? inst.name.id : inst;
     let letter;
-    switch (inst.name.id) {
+    switch (buttonCode) {
         case "Backspace":
             backspace();
             return;
@@ -175,13 +209,13 @@ function workWithTextarea (inst) {
             delSymbol();
             return;
         case "Enter":
-            letter = inst.value;
+            letter = "\n";
             break;
         case "Space":
-            letter = inst.value;
+            letter = " ";
             break;
         case "Tab":
-            letter = inst.value;
+            letter = "    ";
             break;
         case "MetaLeft":
         case "AltRight":
@@ -189,11 +223,13 @@ function workWithTextarea (inst) {
             letter = generateJokes();
             break;
         default:
-            letter = inst.buttonValue.textContent;
+            letter = symbol;
             
     }
     textarea.setRangeText(letter, textarea.selectionStart, textarea.selectionEnd, "end");
 }
+
+
 
 function backspace() {
     if (textarea.selectionStart === 0 && textarea.selectionEnd === 0) return;
@@ -210,6 +246,7 @@ function delSymbol() {
         textarea.setRangeText("", textarea.selectionStart, textarea.selectionEnd, "end");
 }
 
+
 document.addEventListener("keydown", (e) => {
     document.body.style.pointerEvents = "none";
     if (["Shift", "Control"].includes(e.key)) {
@@ -218,8 +255,13 @@ document.addEventListener("keydown", (e) => {
     if (e.code === "ShiftLeft" || e.code === "ShiftRight") {
         if (e.repeat) return;
         buttonsArray[0].shiftButton();
+        return;
     }
-    if (e.code === "CapsLock") buttonsArray[29]._capsLock();
+    if (e.code === "CapsLock") {
+        buttonsArray[29]._capsLock();
+        return;
+    }
+    workWithTextarea(e);
 })
 document.addEventListener("keyup", (e) => {
     document.body.style.pointerEvents = "inherit";
@@ -232,18 +274,117 @@ document.addEventListener("keyup", (e) => {
     multiPress.length = 0;
 })
 
+const fragment = document.createDocumentFragment();
 const buttonsArray = buttons.map(el => {
     const button = new KeyboardButton (el);
     button.createButton();
-    document.querySelector(".keyboard__wrapper").append(button.button);
+    fragment.append(button.button);
     return button;
 })
-const directions = document.createElement("button");
-directions.classList.add("key");
-directions.style.width = "19.2%"
-document.querySelector(".keyboard__wrapper").append(directions);
+const btnLeft = document.createElement("button");
+btnLeft.classList.add("key", "key__slim");
+const spanLeft = document.createElement("span");
+spanLeft.classList.add("key__value", "material-symbols-outlined");
+spanLeft.textContent = "keyboard_arrow_left";
+btnLeft.append(spanLeft);
 
+const btnUp = document.createElement("button");
+btnUp.classList.add("key", "key__slim");
+const spanUp = document.createElement("span");
+spanUp.classList.add("key__value", "material-symbols-outlined");
+spanUp.textContent = "keyboard_arrow_up";
+btnUp.append(spanUp);
+
+const btnDown = document.createElement("button");
+btnDown.classList.add("key", "key__slim");
+const spanDown = document.createElement("span");
+spanDown.classList.add("key__value", "material-symbols-outlined");
+spanDown.textContent = "keyboard_arrow_down";
+btnDown.append(spanDown);
+
+const btnRight = document.createElement("button");
+btnRight.classList.add("key", "key__slim");
+const spanRight = document.createElement("span");
+spanRight.classList.add("key__value", "material-symbols-outlined");
+spanRight.textContent = "keyboard_arrow_right";
+btnRight.append(spanRight);
+
+const centralBtnsWrapper = document.createElement("div");
+centralBtnsWrapper.classList.add("central-btns-wrapper");
+centralBtnsWrapper.append(btnUp, btnDown);
+
+document.querySelector(".keyboard__wrapper").append(fragment, btnLeft, centralBtnsWrapper, btnRight);
+
+btnLeft.addEventListener("click", () => {
+    textarea.selectionStart = textarea.selectionEnd = textarea.selectionStart - 1;
+    console.log(textarea.value);
+})
+
+btnRight.addEventListener("click", () => {
+    textarea.selectionStart = textarea.selectionEnd = textarea.selectionStart + 1;
+})
+
+btnUp.addEventListener("click", () => {
+    let c = 0;
+    let symbNum = Math.round((textarea.clientWidth - 40)/8.783);
+    let rows = textarea.value.slice(0, textarea.selectionStart).split("\n");
+    rows = splitRows (rows, symbNum);
+    console.log(rows[0].length, symbNum);
+    if (rows.length === 1 && rows[0].length === symbNum){
+        rows.push("");
+        c = 1;
+    }
+    if (rows.length < 2) return;
+    console.log("works");
+    let currentRowLength = rows[rows.length - 1].length;
+    let targetRowLength = rows[rows.length - 2].length;
+    console.log(currentRowLength, targetRowLength)
+    
+    textarea.selectionStart = textarea.selectionEnd = currentRowLength < targetRowLength ? textarea.selectionStart - (targetRowLength) - 1 + c : textarea.selectionStart - (currentRowLength) - 1 + c;
+
+})
+
+btnDown.addEventListener("click", () => {
+    let symbNum = Math.round((textarea.clientWidth - 40)/8.783);
+    let rows = textarea.value.slice(0, textarea.selectionStart).split("\n");
+    rows = splitRows (rows, symbNum);
+    let currentRowLength = rows[rows.length - 1].length;
+
+
+    rows = textarea.value.slice(textarea.selectionStart, textarea.value.length).split("\n");
+    let c = 0;
+    if (rows[0].length > symbNum - currentRowLength) {
+        let firstRow = rows[0].slice(0, symbNum - currentRowLength);
+        rows[0] = rows[0].slice(symbNum - currentRowLength, rows[0].length);
+        rows.unshift(firstRow);
+        c = -1;
+    }
+
+    rows = splitRows (rows, symbNum);
+    if (rows.length < 2) return;
+    let restCurRowLength = rows[0].length;
+    let targetRowLength = rows[1].length;
+    
+    textarea.selectionStart = textarea.selectionEnd = currentRowLength > targetRowLength ? textarea.selectionStart + (targetRowLength + restCurRowLength) + 1 + c : textarea.selectionStart + (restCurRowLength + currentRowLength) + 1 + c;
+
+})
+
+function splitRows (rows, symbNum) {
+    rows = rows.reduce((acc, el) => {
+        if (el.length > symbNum) {
+            // el = el + "t";
+            for (let i = 0; i < el.length; i += symbNum) {
+                acc.push(el.slice(i, i + symbNum - 1));
+            }
+        } else acc.push(el);
+        return acc;
+    }, [])
+    return rows;
+}
+    
+
+// jokes
 function generateJokes()  {
     let index = Math.floor(Math.random()*jokes.length);
-    return ("Не знаю зачем здесь эта кнопка. Пусть хоть анекдот расскажет: \n" + jokes[index] + "\n");
+    return ("   ", "Не знаю зачем здесь эта кнопка. Пусть хоть анекдот расскажет: \n" + jokes[index] + "\n");
 }
