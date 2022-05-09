@@ -118,7 +118,12 @@ class KeyboardButton {
   pressButton() {
     this.button.addEventListener('click', () => {
       switch (this.name.id) {
-        case 'CapsLock': this.value(); break;
+        case 'CapsLock':
+          if (isShift) {
+            this.shiftButton();
+          }
+          this.capsLock();
+          break;
         case 'ShiftLeft':
         case 'ShiftRight': this.shiftButton(); break;
         case 'ControlRight':
@@ -158,6 +163,14 @@ class KeyboardButton {
           isShift = true;
         }
       });
+    }
+    if (isShift && isCaps) {
+      registr = 'low';
+      this.changeButtonsValue();
+    }
+    if (!isShift && isCaps) {
+      registr = 'high';
+      this.changeButtonsValue();
     }
   }
 
