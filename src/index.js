@@ -1,10 +1,8 @@
 import './styles/main.scss';
 import buttons from './script/buttons';
 
-
 let lang = 'en';
 let registr = 'low';
-const multiPress = [];
 let isCaps = false;
 let isShift = false;
 let isCtrl = false;
@@ -315,14 +313,12 @@ function createKeyboard() {
   document.addEventListener('keydown', (e) => {
     document.body.style.pointerEvents = 'none';
     if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
-      if (e.repeat && multiPress.length !== 0) return;
-      multiPress.push(e.code);
-      console.log("work");
+      if (e.repeat) return;
       buttonsArray[0].shiftButton();
       return;
     }
-    if ('Control' === e.key) {
-        isCtrl = true;
+    if (e.key === 'Control') {
+      isCtrl = true;
     }
     if (e.code === 'CapsLock') {
       buttonsArray[29].capsLock();
@@ -346,11 +342,9 @@ function createKeyboard() {
     if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
       buttonsArray[0].shiftButton();
     }
-    if ('Control' === e.key) {
-        isCtrl = false;
+    if (e.key === 'Control') {
+      isCtrl = false;
     }
-    console.log(multiPress);
-    multiPress.length = 0;
     switch (e.code) {
       case 'ArrowUp': btnUp.classList.remove('active'); break;
       case 'ArrowDown': btnDown.classList.remove('active'); break;
