@@ -383,12 +383,12 @@ function createKeyboard() {
 
   btnLeft.addEventListener('click', () => {
     textarea.selectionStart -= 1;
-    textarea.selectionEnd = textarea.selectionStart - 1;
+    textarea.selectionEnd = textarea.selectionStart;
   });
 
   btnRight.addEventListener('click', () => {
     textarea.selectionStart += 1;
-    textarea.selectionEnd = textarea.selectionStart + 1;
+    textarea.selectionEnd = textarea.selectionStart;
   });
 
   function splitRows(rows, symbNum) {
