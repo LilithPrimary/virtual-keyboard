@@ -24,6 +24,7 @@ module.exports = {
         compress: true,
         port: 9000,
     },
+    devtool: 'inline-source-map',
     plugins: [
         new HtmlWebpackPlugin({
             title: 'webpack Boilerplate',
